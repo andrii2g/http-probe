@@ -1,4 +1,4 @@
-﻿use std::time::Duration;
+use std::time::Duration;
 
 use clap::Parser;
 
@@ -17,16 +17,37 @@ pub struct Cli {
     #[arg(value_name = "URL", help = "HTTP or HTTPS endpoint to probe")]
     pub url: String,
 
-    #[arg(short = 'c', long, default_value_t = 10, value_name = "COUNT", help = "Number of requests")]
+    #[arg(
+        short = 'c',
+        long,
+        default_value_t = 10,
+        value_name = "COUNT",
+        help = "Number of requests"
+    )]
     pub count: u32,
 
-    #[arg(long, default_value_t = 5000, value_name = "MILLISECONDS", help = "Total timeout per request")]
+    #[arg(
+        long,
+        default_value_t = 5000,
+        value_name = "MILLISECONDS",
+        help = "Total timeout per request"
+    )]
     pub timeout_ms: u64,
 
-    #[arg(long, default_value_t = 3000, value_name = "MILLISECONDS", help = "Connection timeout per request")]
+    #[arg(
+        long,
+        default_value_t = 3000,
+        value_name = "MILLISECONDS",
+        help = "Connection timeout per request"
+    )]
     pub connect_timeout_ms: u64,
 
-    #[arg(long, default_value_t = 0, value_name = "MILLISECONDS", help = "Delay between requests")]
+    #[arg(
+        long,
+        default_value_t = 0,
+        value_name = "MILLISECONDS",
+        help = "Delay between requests"
+    )]
     pub interval_ms: u64,
 
     #[arg(long, help = "Follow HTTP redirects, up to 10")]
@@ -51,7 +72,9 @@ pub struct ProbeConfig {
 impl Cli {
     pub fn validate(self) -> Result<ProbeConfig, AppError> {
         if self.url.is_empty() {
-            return Err(AppError::InvalidConfiguration("URL must not be empty".to_string()));
+            return Err(AppError::InvalidConfiguration(
+                "URL must not be empty".to_string(),
+            ));
         }
 
         let is_https = if self.url.starts_with("https://") {

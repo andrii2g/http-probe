@@ -1,4 +1,4 @@
-﻿use std::time::{Duration, Instant};
+use std::time::{Duration, Instant};
 
 use curl::easy::{Easy2, Handler, WriteError};
 
@@ -74,8 +74,8 @@ fn configure_handle(easy: &mut Easy2<DiscardBody>, config: &ProbeConfig) -> Resu
         .map_err(|source| setup_error("forbid_reuse", source))?;
     easy.dns_cache_timeout(Duration::ZERO)
         .map_err(|source| setup_error("dns_cache_timeout", source))?;
-    easy.nosignal(true)
-        .map_err(|source| setup_error("nosignal", source))?;
+    easy.signal(false)
+        .map_err(|source| setup_error("signal", source))?;
 
     Ok(())
 }
@@ -145,7 +145,10 @@ fn read_response_metadata(easy: &Easy2<DiscardBody>) -> Result<ResponseMetadata,
             field: "response_code",
             source,
         })?;
-    let primary_ip = easy.primary_ip().ok().and_then(|ip| ip.map(ToOwned::to_owned));
+    let primary_ip = easy
+        .primary_ip()
+        .ok()
+        .and_then(|ip| ip.map(ToOwned::to_owned));
     let downloaded_bytes = easy.get_ref().bytes_received;
 
     Ok(ResponseMetadata {
@@ -163,7 +166,7 @@ fn classify_curl_error(error: &curl::Error) -> TransportFailureKind {
     } else if error.is_operation_timedout() {
         TransportFailureKind::Timeout
     } else if error.is_ssl_connect_error()
-        || error.is_ssl_peer_certificate()
+        || error.is_ssl_cacert()
         || error.is_ssl_cacert_badfile()
         || error.is_peer_failed_verification()
     {

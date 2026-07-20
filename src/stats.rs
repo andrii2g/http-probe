@@ -1,7 +1,5 @@
-﻿use crate::cli::ProbeConfig;
-use crate::model::{
-    AttemptResult, LatencySummary, RunSummary, TransportFailureKind, TimingSample,
-};
+use crate::cli::ProbeConfig;
+use crate::model::{AttemptResult, LatencySummary, RunSummary, TimingSample};
 
 #[derive(Debug, Clone)]
 pub struct MetricStats {
@@ -72,11 +70,15 @@ pub fn build_run_summary(config: &ProbeConfig, attempts: Vec<AttemptResult>) -> 
     for attempt in &attempts {
         match attempt {
             AttemptResult::Success(success) => {
-                *status_counts.entry(success.response.status_code).or_insert(0) += 1;
+                *status_counts
+                    .entry(success.response.status_code)
+                    .or_insert(0) += 1;
                 successful_timings.push(success.timing.clone());
             }
             AttemptResult::HttpFailure(failure) => {
-                *status_counts.entry(failure.response.status_code).or_insert(0) += 1;
+                *status_counts
+                    .entry(failure.response.status_code)
+                    .or_insert(0) += 1;
             }
             AttemptResult::TransportFailure(failure) => {
                 *transport_failure_counts
@@ -121,7 +123,11 @@ fn summarize_latency(timings: &[TimingSample], is_https: bool) -> Option<Latency
     Some(LatencySummary {
         dns: summarize(&dns)?,
         tcp: summarize(&tcp)?,
-        tls: if is_https { summarize(&tls_values) } else { None },
+        tls: if is_https {
+            summarize(&tls_values)
+        } else {
+            None
+        },
         ttfb: summarize(&ttfb)?,
         download: summarize(&download)?,
         total: summarize(&total)?,
@@ -142,6 +148,7 @@ mod tests {
     use super::*;
     use crate::model::{
         HttpFailureAttempt, ResponseMetadata, SuccessfulAttempt, TransportFailureAttempt,
+        TransportFailureKind,
     };
 
     #[test]
@@ -224,7 +231,10 @@ mod tests {
 
     #[test]
     fn builds_mixed_status_summary() {
-        let summary = build_run_summary(&config(2, true), vec![success(1, 200), http_failure(2, 503)]);
+        let summary = build_run_summary(
+            &config(2, true),
+            vec![success(1, 200), http_failure(2, 503)],
+        );
         assert_eq!(summary.successful_attempts, 1);
         assert_eq!(summary.failed_attempts, 1);
         assert_eq!(summary.failure_rate, 50.0);

@@ -1,4 +1,4 @@
-﻿use crate::model::{AttemptResult, RunSummary};
+use crate::model::{AttemptResult, RunSummary};
 use crate::stats::MetricStats;
 
 pub fn print_report(summary: &RunSummary) {
@@ -6,10 +6,16 @@ pub fn print_report(summary: &RunSummary) {
     write_report(summary, &mut stdout).expect("writing to stdout should not fail");
 }
 
-pub fn write_report<W: std::io::Write>(summary: &RunSummary, writer: &mut W) -> std::io::Result<()> {
+pub fn write_report<W: std::io::Write>(
+    summary: &RunSummary,
+    writer: &mut W,
+) -> std::io::Result<()> {
     writeln!(writer, "HTTP Latency Probe")?;
     writeln!(writer, "Target:           {}", summary.target)?;
-    writeln!(writer, "Measurement:      fresh DNS and connection per attempt")?;
+    writeln!(
+        writer,
+        "Measurement:      fresh DNS and connection per attempt"
+    )?;
     writeln!(writer, "Attempts:         {}", summary.requested_attempts)?;
     writeln!(writer, "Successful:       {}", summary.successful_attempts)?;
     writeln!(writer, "Failed:           {}", summary.failed_attempts)?;
@@ -17,12 +23,19 @@ pub fn write_report<W: std::io::Write>(summary: &RunSummary, writer: &mut W) -> 
     writeln!(
         writer,
         "HTTP redirects:   {}",
-        if summary.follow_redirects { "enabled" } else { "disabled" }
+        if summary.follow_redirects {
+            "enabled"
+        } else {
+            "disabled"
+        }
     )?;
     writeln!(writer)?;
 
     if let Some(latency) = &summary.latency {
-        writeln!(writer, "Latency statistics for successful requests (milliseconds)")?;
+        writeln!(
+            writer,
+            "Latency statistics for successful requests (milliseconds)"
+        )?;
         writeln!(writer)?;
         writeln!(
             writer,
