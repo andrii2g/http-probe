@@ -106,9 +106,13 @@ impl TestServer {
         let listener = TcpListener::bind("127.0.0.1:0").unwrap();
         let addr = listener.local_addr().unwrap();
         let handle = thread::spawn(move || {
+            let mut handles = Vec::new();
             for response in responses {
                 let (stream, _) = listener.accept().unwrap();
-                handle_connection(stream, response);
+                handles.push(thread::spawn(move || handle_connection(stream, response)));
+            }
+            for handle in handles {
+                let _ = handle.join();
             }
         });
 
@@ -126,7 +130,7 @@ impl TestServer {
 impl Drop for TestServer {
     fn drop(&mut self) {
         if let Some(handle) = self.handle.take() {
-            handle.join().unwrap();
+            let _ = handle.join();
         }
     }
 }
@@ -142,7 +146,9 @@ fn handle_connection(mut stream: TcpStream, response: ResponseMode) {
         let mut line = String::new();
         loop {
             line.clear();
-            let bytes = reader.read_line(&mut line).unwrap();
+            let Ok(bytes) = reader.read_line(&mut line) else {
+                return;
+            };
             if bytes == 0 || line == "\r\n" {
                 break;
             }
@@ -161,10 +167,9 @@ fn handle_connection(mut stream: TcpStream, response: ResponseMode) {
     } else {
         "Service Unavailable"
     };
-    write!(
+    let _ = write!(
         stream,
         "HTTP/1.1 {status} {reason}\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}",
         body.len()
-    )
-    .unwrap();
+    );
 }
