@@ -1,0 +1,24 @@
+﻿[package]
+name = "http-probe"
+version = "0.1.0"
+edition = "2026"
+description = "Probe an HTTP endpoint repeatedly and report detailed latency statistics"
+license = "MIT"
+repository = "https://github.com/andrii2g/http-probe"
+keywords = ["http", "latency", "cli", "monitoring", "networking"]
+categories = ["command-line-utilities", "network-programming"]
+rust-version = "1.85"
+
+[dependencies]
+clap = { version = "4.6", features = ["derive"] }
+curl = "0.4.50"
+
+[dev-dependencies]
+assert_cmd = "2"
+predicates = "3"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = "symbols"
+panic = "abort"
