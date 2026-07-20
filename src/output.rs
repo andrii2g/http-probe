@@ -1,9 +1,9 @@
 use crate::model::{AttemptResult, RunSummary};
 use crate::stats::MetricStats;
 
-pub fn print_report(summary: &RunSummary) {
+pub fn print_report(summary: &RunSummary) -> std::io::Result<()> {
     let mut stdout = std::io::stdout();
-    write_report(summary, &mut stdout).expect("writing to stdout should not fail");
+    write_report(summary, &mut stdout)
 }
 
 pub fn write_report<W: std::io::Write>(
@@ -89,10 +89,12 @@ pub fn write_report<W: std::io::Write>(
     Ok(())
 }
 
-pub fn print_verbose_attempt(result: &AttemptResult, requested_attempts: u32) {
+pub fn print_verbose_attempt(
+    result: &AttemptResult,
+    requested_attempts: u32,
+) -> std::io::Result<()> {
     let mut stderr = std::io::stderr();
     write_verbose_attempt(result, requested_attempts, &mut stderr)
-        .expect("writing to stderr should not fail");
 }
 
 pub fn write_verbose_attempt<W: std::io::Write>(

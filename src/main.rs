@@ -1,4 +1,4 @@
-﻿use std::process::ExitCode;
+use std::process::ExitCode;
 
 fn main() -> ExitCode {
     match http_probe::run_from_env() {

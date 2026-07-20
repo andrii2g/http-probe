@@ -1,4 +1,4 @@
-﻿pub mod cli;
+pub mod cli;
 pub mod error;
 pub mod model;
 pub mod output;
@@ -15,7 +15,8 @@ use model::{AttemptResult, RunSummary};
 pub fn run_from_env() -> Result<u8, AppError> {
     let cli = Cli::parse();
     let summary = execute(cli)?;
-    output::print_report(&summary);
+    output::print_report(&summary)
+        .map_err(|error| AppError::Internal(format!("failed to write report: {error}")))?;
     Ok(exit_code_for_summary(&summary))
 }
 
@@ -26,7 +27,9 @@ pub fn execute(cli: Cli) -> Result<RunSummary, AppError> {
     for attempt_number in 1..=config.count {
         let result = probe::probe_once(&config, attempt_number)?;
         if config.verbose {
-            output::print_verbose_attempt(&result, config.count);
+            output::print_verbose_attempt(&result, config.count).map_err(|error| {
+                AppError::Internal(format!("failed to write verbose attempt: {error}"))
+            })?;
         }
         attempts.push(result);
 
